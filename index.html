@@ -1,488 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Presentation Grader</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f2f2ee;color:#1a1a1a;min-height:100vh;padding:1.5rem 1rem}
-.wrap{max-width:920px;margin:0 auto}
-h1{font-size:21px;font-weight:600;margin-bottom:.2rem}
-.sub{font-size:13px;color:#999;margin-bottom:1.4rem}
-
-/* Breadcrumb */
-.bc{display:flex;align-items:center;gap:5px;font-size:13px;margin-bottom:1.25rem;flex-wrap:wrap;padding:.6rem .9rem;background:#fff;border:0.5px solid #e0e0dc;border-radius:10px}
-.bc-sep{color:#ccc}
-.bc-btn{padding:3px 8px;border-radius:6px;cursor:pointer;color:#aaa;transition:background .15s,color .15s;white-space:nowrap}
-.bc-btn.reachable{color:#555;cursor:pointer}
-.bc-btn.reachable:hover{background:#f0f0eb;color:#1a1a1a}
-.bc-btn.current{color:#1a1a1a;font-weight:600;background:#f0f0eb}
-
-/* Card */
-.card{background:#fff;border:0.5px solid #e0e0dc;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
-.card-label{font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem}
-
-/* Upload */
-.upload-zone{text-align:center;padding:2.5rem 1rem;border:1.5px dashed #d5d5d0;border-radius:10px;cursor:pointer;background:#fafaf7;transition:border-color .2s}
-.upload-zone:hover{border-color:#999}
-.upload-zone p{font-size:14px;color:#999;margin-bottom:.8rem}
-
-/* Restore banner */
-.restore-banner{background:#fff8e1;border:0.5px solid #ffe082;border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1rem;font-size:13px;color:#5d4037;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.restore-banner strong{color:#3e2723}
-
-/* Buttons */
-button{font-family:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:0.5px solid #d0d0cc;background:#fff;cursor:pointer;transition:background .15s,transform .1s}
-button:hover{background:#f0f0eb}
-button:active{transform:scale(.98)}
-button.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-button.primary:hover{background:#333}
-button.pill{border-radius:20px;padding:7px 18px}
-button.pill.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-button.pill.done{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
-button.pill.done.active{background:#2e7d32;color:#fff;border-color:#2e7d32}
-button.export{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:500;padding:7px 20px}
-button.export:hover{background:#333}
-button.sm{font-size:12px;padding:4px 10px}
-button.danger{color:#c62828;border-color:#ef9a9a;font-size:11px;padding:3px 8px}
-button.warn{background:#fff3e0;color:#e65100;border-color:#ffcc80;font-size:12px}
-button.warn:hover{background:#ffe0b2}
-
-/* Inputs */
-input[type=text],input[type=number],textarea{font-family:inherit;font-size:13px;padding:6px 9px;border:0.5px solid #d0d0cc;border-radius:7px;background:#fff;color:#1a1a1a;outline:none;transition:border-color .15s}
-input:focus,textarea:focus{border-color:#888}
-textarea{resize:vertical;width:100%}
-
-.tag-group{display:flex;flex-wrap:wrap;gap:8px}
-.crit-row{display:flex;gap:8px;align-items:center;margin-bottom:7px}
-.crit-row input[type=text]{flex:1}
-.info-bar{background:#f7f7f3;border-radius:8px;padding:.6rem 1rem;font-size:13px;color:#666;margin-bottom:1rem}
-.info-bar strong{color:#1a1a1a}
-.row-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-
-/* Progress */
-.prog-wrap{height:3px;background:#e8e8e4;border-radius:2px;margin-top:.6rem}
-.prog-bar{height:3px;background:#1a1a1a;border-radius:2px;transition:width .35s}
-
-/* Student card */
-.s-card{background:#fff;border:0.5px solid #e5e5e0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px}
-.s-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.avatar{width:38px;height:38px;border-radius:50%;background:#e8eaf6;color:#3949ab;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
-.s-name{font-size:14px;font-weight:500}
-.s-id{font-size:12px;color:#bbb;margin-top:1px}
-.s-total{margin-left:auto;font-size:15px;font-weight:700;white-space:nowrap}
-.grades-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:9px}
-.g-cell label{font-size:11px;color:#bbb;display:block;margin-bottom:3px}
-.g-cell .g-row{display:flex;align-items:center;gap:5px}
-.g-cell input[type=number]{width:58px;text-align:center;font-size:14px;font-weight:500}
-.g-max{font-size:12px;color:#ccc}
-
-/* Bottom bar */
-.bottom-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:.75rem 1.25rem;background:#f7f7f3;border-radius:10px;margin-top:.5rem}
-.saved-badge{font-size:11px;padding:2px 10px;border-radius:20px;opacity:0;transition:opacity .3s}
-.saved-badge.show{opacity:1}
-.saved-badge.ok{background:#e8f5e9;color:#2e7d32}
-.saved-badge.err{background:#ffebee;color:#c62828}
-
-@media(max-width:540px){.grades-grid{grid-template-columns:1fr 1fr}h1{font-size:18px}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentation Grader</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="wrap">
 
-<h1>Presentation Grader</h1>
-<p class="sub">Grade student project presentations · grades saved automatically in your browser</p>
+  <h1>Presentation Grader</h1>
+  <p class="sub">Grade student project presentations · grades saved automatically in your browser</p>
 
-<!-- Breadcrumb -->
-<div class="bc">
-  <span class="bc-btn" id="bc1" onclick="tryGoStep(1)">📁 Upload</span>
-  <span class="bc-sep">›</span>
-  <span class="bc-btn" id="bc2" onclick="tryGoStep(2)">🏫 Lab Group</span>
-  <span class="bc-sep">›</span>
-  <span class="bc-btn" id="bc3" onclick="tryGoStep(3)">👥 Project Group</span>
-  <span class="bc-sep">›</span>
-  <span class="bc-btn" id="bc4" onclick="tryGoStep(4)">✏️ Grade</span>
-</div>
-
-<!-- Restore banner (shown if saved data found) -->
-<div class="restore-banner" id="restore-banner" style="display:none">
-  <div>
-    <strong>Saved session found.</strong>
-    Grades from a previous session are loaded — you can continue grading.
+  <!-- Breadcrumb -->
+  <div class="bc">
+    <span class="bc-btn" id="bc1" onclick="tryGoStep(1)">📁 Upload</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-btn" id="bc2" onclick="tryGoStep(2)">🏫 Lab Group</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-btn" id="bc3" onclick="tryGoStep(3)">👥 Project Group</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-btn" id="bc4" onclick="tryGoStep(4)">✏️ Grade</span>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="warn" onclick="clearSaved()">🗑 Clear saved data</button>
-    <button class="export" onclick="exportXLSX()">⬇ Download Excel</button>
-  </div>
-</div>
 
-<!-- STEP 1 -->
-<div id="sec1">
-  <div class="card">
-    <div class="upload-zone" onclick="document.getElementById('fin').click()">
-      <p>Upload your Excel file (.xlsx) to start grading</p>
-      <button class="primary" onclick="event.stopPropagation();document.getElementById('fin').click()">Choose file</button>
-      <p id="fname" style="margin-top:.6rem;font-size:12px;color:#bbb"></p>
+  <!-- Restore banner -->
+  <div class="restore-banner" id="restore-banner" style="display:none">
+    <div>
+      <strong>Saved session found.</strong>
+      Grades from a previous session are loaded — you can continue grading.
     </div>
-    <input type="file" id="fin" accept=".xlsx,.xls" style="display:none">
-  </div>
-  <div class="card">
-    <div class="row-between" style="margin-bottom:.85rem">
-      <span class="card-label" style="margin:0">Grading criteria</span>
-      <button class="sm" onclick="addCrit()">+ add</button>
-    </div>
-    <div id="crit-list"></div>
-    <p style="font-size:12px;color:#ccc;margin-top:.6rem">Edit criteria before grading. Total = sum of all.</p>
-  </div>
-</div>
-
-<!-- STEP 2 -->
-<div id="sec2" style="display:none">
-  <div class="card">
-    <div class="card-label">Select today's lab group</div>
-    <div class="tag-group" id="lab-btns"></div>
-  </div>
-  <div class="card" style="background:#f9f9f5">
-    <div class="row-between">
-      <span style="font-size:13px;color:#999">Overall progress</span>
-      <span style="font-size:13px;font-weight:600" id="overall-lbl"></span>
-    </div>
-    <div class="prog-wrap"><div class="prog-bar" id="overall-bar" style="width:0%"></div></div>
-  </div>
-</div>
-
-<!-- STEP 3 -->
-<div id="sec3" style="display:none">
-  <div class="card">
-    <div class="card-label">Select presenting group</div>
-    <div class="info-bar" id="lab-info"></div>
-    <div class="tag-group" id="nick-btns"></div>
-    <div style="margin-top:1rem">
-      <span style="font-size:12px;color:#bbb" id="lab-prog-lbl"></span>
-      <div class="prog-wrap"><div class="prog-bar" id="lab-prog-bar" style="width:0%"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="warn" onclick="clearSaved()">🗑 Clear saved data</button>
+      <button class="export" onclick="exportXLSX()">⬇ Download Excel</button>
     </div>
   </div>
-</div>
 
-<!-- STEP 4 -->
-<div id="sec4" style="display:none">
-  <div class="card">
-    <div class="row-between">
-      <div class="info-bar" id="grp-info" style="margin:0;flex:1;min-width:0"></div>
-      <button class="export" onclick="exportXLSX()" style="margin-left:12px;flex-shrink:0">⬇ Download Excel</button>
+  <!-- Step 1: Upload + Criteria -->
+  <div id="sec1">
+    <div class="card">
+      <div class="upload-zone" onclick="document.getElementById('fin').click()">
+        <p>Upload your Excel file (.xlsx) to start grading</p>
+        <button class="primary" onclick="event.stopPropagation();document.getElementById('fin').click()">Choose file</button>
+        <p id="fname" style="margin-top:.6rem;font-size:12px;color:#bbb"></p>
+      </div>
+      <input type="file" id="fin" accept=".xlsx,.xls" style="display:none">
+    </div>
+    <div class="card">
+      <div class="row-between" style="margin-bottom:.85rem">
+        <span class="card-label" style="margin:0">Grading criteria</span>
+        <button class="sm" onclick="addCrit()">+ add</button>
+      </div>
+      <div id="crit-list"></div>
+      <p style="font-size:12px;color:#ccc;margin-top:.6rem">Edit criteria before grading. Total = sum of all.</p>
     </div>
   </div>
-  <div id="students-list"></div>
-  <div class="bottom-bar">
-    <span style="font-size:13px;color:#999" id="grade-prog-lbl"></span>
-    <span class="saved-badge" id="saved-badge"></span>
+
+  <!-- Step 2: Lab group -->
+  <div id="sec2" style="display:none">
+    <div class="card">
+      <div class="card-label">Select today's lab group</div>
+      <div class="tag-group" id="lab-btns"></div>
+    </div>
+    <div class="card" style="background:#f9f9f5">
+      <div class="row-between">
+        <span style="font-size:13px;color:#999">Overall progress</span>
+        <span style="font-size:13px;font-weight:600" id="overall-lbl"></span>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-bar" id="overall-bar" style="width:0%"></div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <!-- Step 3: Project group (nickname) -->
+  <div id="sec3" style="display:none">
+    <div class="card">
+      <div class="card-label">Select presenting group</div>
+      <div class="info-bar" id="lab-info"></div>
+      <div class="tag-group" id="nick-btns"></div>
+      <div style="margin-top:1rem">
+        <span style="font-size:12px;color:#bbb" id="lab-prog-lbl"></span>
+        <div class="prog-wrap">
+          <div class="prog-bar" id="lab-prog-bar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Grade -->
+  <div id="sec4" style="display:none">
+    <div class="card">
+      <div class="row-between">
+        <div class="info-bar" id="grp-info" style="margin:0;flex:1;min-width:0"></div>
+        <button class="export" onclick="exportXLSX()" style="margin-left:12px;flex-shrink:0">⬇ Download Excel</button>
+      </div>
+    </div>
+    <div id="students-list"></div>
+    <div class="bottom-bar">
+      <span style="font-size:13px;color:#999" id="grade-prog-lbl"></span>
+      <span class="saved-badge" id="saved-badge"></span>
+    </div>
+  </div>
 
 </div><!-- /wrap -->
 
-<script>
-// ── State ─────────────────────────────────────────────────
-let groups = [], grades = {}, curLab = '', curNick = '', step = 1;
-let criteria = [
-  { label: 'Presentation clarity',    max: 20 },
-  { label: 'Technical understanding', max: 20 },
-  { label: 'Contribution to project', max: 20 },
-  { label: 'Answering questions',     max: 20 }
-];
-const LS_GRADES  = 'pg_grades_v2';
-const LS_GROUPS  = 'pg_groups_v2';
-const LS_CRIT    = 'pg_criteria_v2';
-
-// ── Boot: restore from localStorage ──────────────────────
-(function boot() {
-  try {
-    const sg = localStorage.getItem(LS_GROUPS);
-    const sc = localStorage.getItem(LS_CRIT);
-    const sv = localStorage.getItem(LS_GRADES);
-    if (sg && sv) {
-      groups  = JSON.parse(sg);
-      grades  = JSON.parse(sv);
-      if (sc) criteria = JSON.parse(sc);
-      renderCrit();
-      document.getElementById('restore-banner').style.display = 'flex';
-      goStep(2);
-      return;
-    }
-  } catch(e) { console.warn('restore failed', e); }
-  renderCrit();
-})();
-
-// ── Criteria ──────────────────────────────────────────────
-function renderCrit() {
-  document.getElementById('crit-list').innerHTML = criteria.map((c, i) => `
-    <div class="crit-row">
-      <input type="text" value="${ea(c.label)}" oninput="criteria[${i}].label=this.value">
-      <span style="font-size:13px;color:#ccc">/</span>
-      <input type="number" value="${c.max}" min="1" max="100" oninput="criteria[${i}].max=+this.value" style="width:58px;text-align:center">
-      <button class="danger" onclick="rmCrit(${i})">remove</button>
-    </div>`).join('');
-}
-function addCrit() { criteria.push({ label: 'New criterion', max: 20 }); renderCrit(); }
-function rmCrit(i) { criteria.splice(i, 1); renderCrit(); }
-
-// ── File upload ───────────────────────────────────────────
-document.getElementById('fin').addEventListener('change', function(e) {
-  const f = e.target.files[0]; if (!f) return;
-  document.getElementById('fname').textContent = f.name;
-  const r = new FileReader();
-  r.onload = ev => {
-    const wb = XLSX.read(ev.target.result, { type: 'binary' });
-    parseGroups(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
-  };
-  r.readAsBinaryString(f);
-});
-
-function ts(v) { return String(v == null ? '' : v).trim(); }
-
-function colVal(row, ...names) {
-  for (const k of Object.keys(row)) {
-    const kl = k.toLowerCase().replace(/\s+/g,' ').trim();
-    for (const n of names) {
-      if (kl === n || kl.includes(n)) return ts(row[k]);
-    }
-  }
-  return '';
-}
-
-function parseGroups(data) {
-  const map = {};
-  data.forEach(row => {
-    const nick = colVal(row, 'nickname');
-    const lab  = colVal(row, 'lab group');
-    const proj = colVal(row, 'project');
-    const key  = lab + '||' + (nick || proj || ts(row['ID']));
-    if (!map[key]) map[key] = { key, nickname: nick, labGroup: lab, project: proj, students: [] };
-    for (let n = 1; n <= 4; n++) {
-      let nm = '', id = '';
-      for (const k of Object.keys(row)) {
-        const kl = k.toLowerCase().trim();
-        if (kl === `student ${n} name`) nm = ts(row[k]);
-        if (kl === `student ${n} id`)   id = ts(row[k]);
-      }
-      if (nm) map[key].students.push({ name: nm, id });
-    }
-  });
-  groups = Object.values(map).map(g => {
-    const seen = new Set();
-    g.students = g.students.filter(s => { if (seen.has(s.name)) return false; seen.add(s.name); return true; });
-    return g;
-  }).filter(g => g.students.length > 0);
-
-  persist();
-  goStep(2);
-}
-
-// ── Persistence ───────────────────────────────────────────
-function persist() {
-  try {
-    localStorage.setItem(LS_GROUPS,  JSON.stringify(groups));
-    localStorage.setItem(LS_GRADES,  JSON.stringify(grades));
-    localStorage.setItem(LS_CRIT,    JSON.stringify(criteria));
-  } catch(e) { showBadge('⚠ could not save', false); }
-}
-function clearSaved() {
-  if (!confirm('Clear all saved grades? This cannot be undone.')) return;
-  localStorage.removeItem(LS_GROUPS);
-  localStorage.removeItem(LS_GRADES);
-  localStorage.removeItem(LS_CRIT);
-  groups = []; grades = {}; curLab = ''; curNick = ''; step = 1;
-  document.getElementById('restore-banner').style.display = 'none';
-  goStep(1);
-}
-
-// ── Navigation ────────────────────────────────────────────
-function tryGoStep(n) {
-  if (n === 1)                                    goStep(1);
-  else if (n === 2 && groups.length > 0)          goStep(2);
-  else if (n === 3 && curLab)                     goStep(3);
-  else if (n === 4 && curLab && curNick)          goStep(4);
-}
-
-function goStep(n) {
-  step = n;
-  // show/hide sections
-  [1,2,3,4].forEach(i => {
-    document.getElementById('sec' + i).style.display = i === n ? 'block' : 'none';
-  });
-  // update breadcrumb
-  updateBC();
-  // render content
-  if (n === 2) renderLabs();
-  if (n === 3) renderNicks();
-  if (n === 4) renderGrading();
-}
-
-function updateBC() {
-  const reachable = [
-    true,                          // step 1 always
-    groups.length > 0,             // step 2
-    groups.length > 0 && !!curLab, // step 3
-    groups.length > 0 && !!curLab && !!curNick // step 4
-  ];
-  [1,2,3,4].forEach(i => {
-    const el = document.getElementById('bc' + i);
-    el.className = 'bc-btn' +
-      (i === step ? ' current' : reachable[i-1] ? ' reachable' : '');
-  });
-}
-
-// ── Step 2: Lab groups ────────────────────────────────────
-function renderLabs() {
-  const labs = [...new Set(groups.map(g => g.labGroup).filter(Boolean))].sort();
-  document.getElementById('lab-btns').innerHTML = labs.map(l => {
-    const done = groups.filter(g => g.labGroup === l).every(g => isGraded(g));
-    const cls  = 'pill' + (done ? ' done' : '') + (l === curLab ? ' active' : '');
-    return `<button class="${cls}" onclick="selectLab('${ej(l)}')">${l}${done ? ' ✓' : ''}</button>`;
-  }).join('');
-  updateOverall();
-}
-function selectLab(lab) { curLab = lab; curNick = ''; goStep(3); }
-function updateOverall() {
-  const tot  = groups.length;
-  const done = groups.filter(g => isGraded(g)).length;
-  const pct  = tot ? Math.round(done / tot * 100) : 0;
-  document.getElementById('overall-lbl').textContent  = done + ' / ' + tot + ' groups graded';
-  document.getElementById('overall-bar').style.width  = pct + '%';
-}
-
-// ── Step 3: Nicknames ─────────────────────────────────────
-function renderNicks() {
-  document.getElementById('lab-info').innerHTML = 'Lab group: <strong>' + curLab + '</strong>';
-  const labGs = groups.filter(g => g.labGroup === curLab);
-  document.getElementById('nick-btns').innerHTML = labGs.map(g => {
-    const done = isGraded(g);
-    const lbl  = g.nickname || g.key;
-    const cls  = 'pill' + (done ? ' done' : '') + (lbl === curNick ? ' active' : '');
-    return `<button class="${cls}" onclick="selectNick('${ej(lbl)}')">${lbl}${done ? ' ✓' : ''}</button>`;
-  }).join('');
-  const done = labGs.filter(g => isGraded(g)).length;
-  const pct  = labGs.length ? Math.round(done / labGs.length * 100) : 0;
-  document.getElementById('lab-prog-lbl').textContent = done + ' / ' + labGs.length + ' groups graded in ' + curLab;
-  document.getElementById('lab-prog-bar').style.width = pct + '%';
-}
-function selectNick(nick) { curNick = nick; goStep(4); }
-
-function isGraded(g) {
-  return g.students.length > 0 && g.students.every(s =>
-    criteria.every(c => { const v = grades[g.key]?.[s.name]?.[c.label]; return v !== undefined && v !== ''; })
-  );
-}
-
-// ── Step 4: Grading ───────────────────────────────────────
-function renderGrading() {
-  const g = groups.find(x => x.labGroup === curLab && (x.nickname || x.key) === curNick);
-  if (!g) { goStep(3); return; }
-
-  document.getElementById('grp-info').innerHTML =
-    'Lab: <strong>' + curLab + '</strong> &nbsp;·&nbsp; Group: <strong>' + (g.nickname || g.key) + '</strong>' +
-    (g.project ? ' &nbsp;·&nbsp; ' + g.project : '') +
-    ' &nbsp;·&nbsp; ' + g.students.length + ' student' + (g.students.length !== 1 ? 's' : '');
-
-  document.getElementById('students-list').innerHTML = g.students.map(st => `
-    <div class="s-card">
-      <div class="s-header">
-        <div class="avatar">${inits(st.name)}</div>
-        <div>
-          <div class="s-name">${st.name}</div>
-          <div class="s-id">${st.id || 'no ID'}</div>
-        </div>
-        <span class="s-total" id="tot-${tid(g.key,st.name)}"></span>
-      </div>
-      <div class="grades-grid">
-        ${criteria.map(c => `
-          <div class="g-cell">
-            <label>${c.label}</label>
-            <div class="g-row">
-              <input type="number" min="0" max="${c.max}" value="${getG(g.key,st.name,c.label)}"
-                oninput="setG('${ej(g.key)}','${ej(st.name)}','${ej(c.label)}',+this.value,${c.max},'${tid(g.key,st.name)}')">
-              <span class="g-max">/ ${c.max}</span>
-            </div>
-          </div>`).join('')}
-      </div>
-      <div>
-        <label style="font-size:11px;color:#ccc;display:block;margin-bottom:3px">Comment (optional)</label>
-        <textarea rows="2" placeholder="Notes..." oninput="setComment('${ej(g.key)}','${ej(st.name)}',this.value)">${grades[g.key]?.[st.name]?.['_comment'] || ''}</textarea>
-      </div>
-    </div>`).join('');
-
-  g.students.forEach(st => updateTot(g.key, st.name));
-  updateGradeProg(g);
-}
-
-function getG(gk, sn, cl) { return grades[gk]?.[sn]?.[cl] ?? ''; }
-
-function setG(gk, sn, cl, val, max, id) {
-  if (!grades[gk])     grades[gk]     = {};
-  if (!grades[gk][sn]) grades[gk][sn] = {};
-  grades[gk][sn][cl] = Math.min(Math.max(isNaN(val) ? 0 : val, 0), max);
-  updateTot(gk, sn);
-  persist();
-  showBadge('✓ saved', true);
-  const g = groups.find(x => x.key === gk); if (g) updateGradeProg(g);
-}
-function setComment(gk, sn, val) {
-  if (!grades[gk])     grades[gk]     = {};
-  if (!grades[gk][sn]) grades[gk][sn] = {};
-  grades[gk][sn]['_comment'] = val;
-  persist();
-}
-function updateTot(gk, sn) {
-  const el = document.getElementById('tot-' + tid(gk, sn)); if (!el) return;
-  const d   = grades[gk]?.[sn] || {};
-  const tot = criteria.reduce((s, c) => s + (+d[c.label] || 0), 0);
-  const mx  = criteria.reduce((s, c) => s + c.max, 0);
-  const pct = mx ? Math.round(tot / mx * 100) : 0;
-  el.textContent  = tot + ' / ' + mx + ' (' + pct + '%)';
-  el.style.color  = pct >= 80 ? '#2e7d32' : pct >= 50 ? '#e65100' : '#c62828';
-}
-function updateGradeProg(g) {
-  const done = g.students.filter(s =>
-    criteria.every(c => { const v = grades[g.key]?.[s.name]?.[c.label]; return v !== undefined && v !== ''; })
-  ).length;
-  const el = document.getElementById('grade-prog-lbl');
-  if (el) el.textContent = done + ' / ' + g.students.length + ' students fully graded';
-}
-function showBadge(msg, ok) {
-  const b = document.getElementById('saved-badge');
-  b.textContent = msg;
-  b.className   = 'saved-badge show ' + (ok ? 'ok' : 'err');
-  clearTimeout(b._t);
-  b._t = setTimeout(() => b.classList.remove('show'), 2200);
-}
-
-// ── Export ────────────────────────────────────────────────
-function exportXLSX() {
-  const mx  = criteria.reduce((s, c) => s + c.max, 0);
-  const hdr = ['Student name', 'Student ID', 'Lab Group', 'Group Nickname', 'Project',
-    ...criteria.map(c => c.label + ' (/' + c.max + ')'), 'Total (/' + mx + ')', 'Comment'];
-  const rows = [hdr];
-  groups.forEach(g => g.students.forEach(st => {
-    const d      = grades[g.key]?.[st.name] || {};
-    const scores = criteria.map(c => d[c.label] !== undefined ? +d[c.label] : '');
-    const tot    = criteria.reduce((s, c) => s + (+d[c.label] || 0), 0);
-    rows.push([st.name, st.id, g.labGroup, g.nickname, g.project, ...scores, tot, d['_comment'] || '']);
-  }));
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:24},{wch:12},{wch:12},{wch:20},{wch:26},
-    ...criteria.map(()=>({wch:20})),{wch:12},{wch:32}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Grades');
-  XLSX.writeFile(wb, 'presentation_grades.xlsx');
-}
-
-// ── Helpers ───────────────────────────────────────────────
-function ej(v)  { return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-function ea(v)  { return String(v).replace(/"/g,'&quot;'); }
-function tid(g,s){ return (g+s).replace(/[^a-zA-Z0-9]/g,'_').slice(0,60); }
-function inits(n){ return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase(); }
-</script>
+<script src="app.js"></script>
 </body>
 </html>

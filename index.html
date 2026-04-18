@@ -8,340 +8,432 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:100vh;padding:1.5rem 1rem}
-.wrap{max-width:900px;margin:0 auto}
-h1{font-size:20px;font-weight:600;margin-bottom:1.5rem}
-.card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
-.card-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
-.upload-zone{text-align:center;padding:2rem;border:1.5px dashed #ccc;border-radius:12px;cursor:pointer;background:#fafaf8;transition:border-color .2s}
-.upload-zone:hover{border-color:#888}
-.upload-zone p{font-size:14px;color:#888;margin-bottom:.75rem}
-button{font-family:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:0.5px solid #ccc;background:#fff;cursor:pointer;transition:background .15s,border-color .15s}
-button:hover{background:#f0f0ee}
-button.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-button.pill{border-radius:20px;padding:6px 16px}
-button.graded{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
-button.graded.active{background:#2e7d32;color:#fff;border-color:#2e7d32}
-button.export{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:500;padding:7px 18px}
+.wrap{max-width:920px;margin:0 auto}
+
+/* Typography */
+h1{font-size:21px;font-weight:600;margin-bottom:.25rem}
+.subtitle{font-size:13px;color:#888;margin-bottom:1.5rem}
+
+/* Breadcrumb nav */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;margin-bottom:1.25rem;flex-wrap:wrap}
+.breadcrumb span{color:#bbb}
+.bc-item{color:#888;cursor:pointer;padding:3px 6px;border-radius:6px;transition:background .15s}
+.bc-item:hover{background:#e8e8e4;color:#1a1a1a}
+.bc-item.active{color:#1a1a1a;font-weight:600;cursor:default}
+.bc-item.active:hover{background:transparent}
+.bc-item.disabled{color:#ccc;cursor:default;pointer-events:none}
+.bc-item.disabled:hover{background:transparent}
+
+/* Cards */
+.card{background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.85rem}
+
+/* Upload */
+.upload-zone{text-align:center;padding:2.5rem 1rem;border:1.5px dashed #d0d0cc;border-radius:10px;cursor:pointer;background:#fafaf8;transition:border-color .2s,background .2s}
+.upload-zone:hover{border-color:#999;background:#f5f5f1}
+.upload-zone p{font-size:14px;color:#999;margin-bottom:.85rem}
+
+/* Buttons */
+button{font-family:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:0.5px solid #d0d0cc;background:#fff;cursor:pointer;transition:background .15s,border-color .15s,transform .1s}
+button:hover{background:#f2f2ee}
+button:active{transform:scale(.98)}
+button.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+button.primary:hover{background:#333}
+button.pill{border-radius:20px;padding:7px 18px;font-size:13px}
+button.pill.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+button.pill.done{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
+button.pill.done.active{background:#2e7d32;color:#fff;border-color:#2e7d32}
+button.export{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:500;padding:7px 20px}
 button.export:hover{background:#333}
-button.back{font-size:12px;color:#888;border-color:transparent;background:transparent;padding:4px 8px}
-button.back:hover{background:#f0f0ee;border-color:#ccc}
+button.sm{font-size:12px;padding:4px 10px}
 button.danger{color:#c62828;border-color:#ef9a9a;font-size:11px;padding:3px 8px}
-input[type=text],input[type=number],textarea,select{font-family:inherit;font-size:13px;padding:5px 8px;border:0.5px solid #ccc;border-radius:6px;background:#fff;color:#1a1a1a;outline:none;transition:border-color .15s}
-input:focus,textarea:focus{border-color:#888}
+
+/* Form inputs */
+input[type=text],input[type=number],textarea{font-family:inherit;font-size:13px;padding:6px 9px;border:0.5px solid #d0d0cc;border-radius:7px;background:#fff;color:#1a1a1a;outline:none;transition:border-color .15s}
+input:focus,textarea:focus{border-color:#888;box-shadow:0 0 0 2px rgba(0,0,0,.04)}
 textarea{resize:vertical;width:100%}
+
+/* Tag groups */
 .tag-group{display:flex;flex-wrap:wrap;gap:8px}
-.crit-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+
+/* Criteria rows */
+.crit-row{display:flex;gap:8px;align-items:center;margin-bottom:7px}
 .crit-row input[type=text]{flex:1}
-.steps{display:flex;margin-bottom:1.25rem;border-radius:10px;overflow:hidden;border:0.5px solid #ddd}
-.step{flex:1;text-align:center;padding:.55rem .5rem;font-size:12px;color:#aaa;background:#fff;border-right:0.5px solid #ddd;transition:all .2s}
-.step:last-child{border-right:none}
-.step.done{color:#555;background:#f9f9f6}
-.step.active{color:#1a1a1a;font-weight:600;background:#f4f4f0}
-.info-bar{background:#f9f9f6;border-radius:8px;padding:.6rem 1rem;font-size:13px;color:#666;margin-bottom:1rem}
+
+/* Info bar */
+.info-bar{background:#f7f7f4;border-radius:8px;padding:.6rem 1rem;font-size:13px;color:#666;margin-bottom:1rem}
 .info-bar strong{color:#1a1a1a}
-.prog-wrap{height:3px;background:#eee;border-radius:2px;margin-top:.5rem}
-.prog-bar{height:3px;background:#1a1a1a;border-radius:2px;transition:width .3s}
-.s-card{background:#fff;border:0.5px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px}
+
+/* Progress */
+.prog-wrap{height:3px;background:#ebebeb;border-radius:2px;margin-top:.6rem}
+.prog-bar{height:3px;background:#1a1a1a;border-radius:2px;transition:width .35s}
+
+/* Student cards */
+.s-card{background:#fff;border:0.5px solid #e5e5e0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px}
 .s-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.avatar{width:36px;height:36px;border-radius:50%;background:#e3f2fd;color:#1565c0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
-.s-name{font-size:14px;font-weight:500}
-.s-id{font-size:12px;color:#999}
-.s-total{margin-left:auto;font-size:15px;font-weight:600}
-.grades-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px}
-.g-cell label{font-size:11px;color:#999;display:block;margin-bottom:3px}
+.avatar{width:38px;height:38px;border-radius:50%;background:#e8eaf6;color:#3949ab;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.s-name{font-size:14px;font-weight:500;line-height:1.3}
+.s-id{font-size:12px;color:#aaa;margin-top:1px}
+.s-total{margin-left:auto;font-size:15px;font-weight:700;white-space:nowrap}
+.grades-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:9px}
+.g-cell label{font-size:11px;color:#aaa;display:block;margin-bottom:3px}
 .g-cell .g-row{display:flex;align-items:center;gap:5px}
-.g-cell input[type=number]{width:54px;text-align:center}
-.g-cell span{font-size:12px;color:#ccc}
+.g-cell input[type=number]{width:58px;text-align:center;font-size:14px;font-weight:500}
+.g-cell .g-max{font-size:12px;color:#ccc}
+
+/* Bottom bar */
+.bottom-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:.75rem 1.25rem;background:#f7f7f4;border-radius:10px;margin-top:.5rem}
+.saved-badge{font-size:11px;padding:2px 10px;background:#e8f5e9;color:#2e7d32;border-radius:20px;opacity:0;transition:opacity .3s}
+.saved-badge.show{opacity:1}
+
 .row-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.saved{display:inline-block;font-size:11px;padding:2px 10px;background:#e8f5e9;color:#2e7d32;border-radius:20px;opacity:0;transition:opacity .3s;margin-left:8px}
-.saved.show{opacity:1}
-@media(max-width:520px){.grades-grid{grid-template-columns:1fr 1fr}.steps .step{font-size:10px;padding:.4rem .2rem}}
+.section-gap{margin-bottom:1.5rem}
+
+@media(max-width:540px){
+  .grades-grid{grid-template-columns:1fr 1fr}
+  h1{font-size:18px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>Presentation Grader</h1>
+  <h1>Presentation Grader</h1>
+  <p class="subtitle">Grade student project presentations by lab group and team nickname</p>
 
-<div class="steps">
-  <div class="step active" id="stp1">1 · Upload</div>
-  <div class="step" id="stp2">2 · Lab group</div>
-  <div class="step" id="stp3">3 · Project group</div>
-  <div class="step" id="stp4">4 · Grade</div>
-</div>
+  <!-- Breadcrumb -->
+  <div class="breadcrumb" id="breadcrumb">
+    <span class="bc-item active" onclick="goStep(1)" id="bc1">Upload</span>
+    <span>›</span>
+    <span class="bc-item disabled" id="bc2">Lab Group</span>
+    <span>›</span>
+    <span class="bc-item disabled" id="bc3">Project Group</span>
+    <span>›</span>
+    <span class="bc-item disabled" id="bc4">Grade</span>
+  </div>
 
-<!-- 1: Upload + criteria -->
-<div id="sec1">
-  <div class="card">
-    <div class="upload-zone" onclick="document.getElementById('fin').click()">
-      <p>Click to upload your Excel file (.xlsx)</p>
-      <button onclick="event.stopPropagation();document.getElementById('fin').click()">Choose file</button>
-      <p id="fname" style="margin-top:.5rem;font-size:12px;color:#aaa"></p>
+  <!-- STEP 1: Upload + Criteria -->
+  <div id="sec1">
+    <div class="card">
+      <div class="upload-zone" onclick="document.getElementById('fin').click()">
+        <p>Upload your Excel file (.xlsx) to get started</p>
+        <button onclick="event.stopPropagation();document.getElementById('fin').click()" class="primary">Choose file</button>
+        <p id="fname" style="margin-top:.6rem;font-size:12px;color:#bbb"></p>
+      </div>
+      <input type="file" id="fin" accept=".xlsx,.xls" style="display:none">
     </div>
-    <input type="file" id="fin" accept=".xlsx,.xls" style="display:none">
-  </div>
-  <div class="card">
-    <div class="row-between" style="margin-bottom:.75rem">
-      <span class="card-title" style="margin:0">Grading criteria</span>
-      <button onclick="addCrit()">+ add</button>
-    </div>
-    <div id="crit-list"></div>
-    <p style="font-size:12px;color:#bbb;margin-top:.5rem">Edit criteria before grading starts. Total marks = sum of all criteria.</p>
-  </div>
-</div>
 
-<!-- 2: Lab group -->
-<div id="sec2" style="display:none">
-  <div class="card">
-    <div class="card-title">Select today's lab group</div>
-    <div class="tag-group" id="lab-btns"></div>
-  </div>
-  <div class="card" style="background:#f9f9f6">
-    <div class="row-between">
-      <span style="font-size:13px;color:#888">Overall progress</span>
-      <span style="font-size:13px;font-weight:500" id="overall-label"></span>
+    <div class="card">
+      <div class="row-between" style="margin-bottom:.85rem">
+        <span class="card-title" style="margin:0">Grading criteria</span>
+        <button onclick="addCrit()" class="sm">+ add criterion</button>
+      </div>
+      <div id="crit-list"></div>
+      <p style="font-size:12px;color:#ccc;margin-top:.6rem">Total mark = sum of all criteria. Edit before grading starts.</p>
     </div>
-    <div class="prog-wrap"><div class="prog-bar" id="overall-bar" style="width:0%"></div></div>
   </div>
-</div>
 
-<!-- 3: Nickname -->
-<div id="sec3" style="display:none">
-  <div class="card">
-    <div class="row-between" style="margin-bottom:.75rem">
-      <span class="card-title" style="margin:0">Select presenting group</span>
-      <button class="back" onclick="go(2)">← back</button>
+  <!-- STEP 2: Lab Group -->
+  <div id="sec2" style="display:none">
+    <div class="card">
+      <div class="card-title">Select today's lab group</div>
+      <div class="tag-group" id="lab-btns"></div>
     </div>
-    <div class="info-bar" id="lab-info"></div>
-    <div class="tag-group" id="nick-btns"></div>
-    <div style="margin-top:1rem">
+    <div class="card" style="background:#f9f9f6">
       <div class="row-between">
-        <span style="font-size:12px;color:#aaa" id="lab-prog-lbl"></span>
+        <span style="font-size:13px;color:#999">Overall grading progress</span>
+        <span style="font-size:13px;font-weight:600" id="overall-lbl"></span>
       </div>
-      <div class="prog-wrap"><div class="prog-bar" id="lab-prog-bar" style="width:0%"></div></div>
+      <div class="prog-wrap"><div class="prog-bar" id="overall-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Project Group (nickname) -->
+  <div id="sec3" style="display:none">
+    <div class="card">
+      <div class="card-title">Select presenting group</div>
+      <div class="info-bar" id="lab-info"></div>
+      <div class="tag-group" id="nick-btns"></div>
+      <div style="margin-top:1rem">
+        <div class="row-between">
+          <span style="font-size:12px;color:#bbb" id="lab-prog-lbl"></span>
+        </div>
+        <div class="prog-wrap"><div class="prog-bar" id="lab-prog-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Grade -->
+  <div id="sec4" style="display:none">
+    <div class="card">
+      <div class="row-between">
+        <div class="info-bar" id="grp-info" style="margin:0;flex:1"></div>
+        <button class="export" onclick="exportXLSX()" style="margin-left:12px;flex-shrink:0">⬇ Download Excel</button>
+      </div>
+    </div>
+    <div id="students-list"></div>
+    <div class="bottom-bar">
+      <span style="font-size:13px;color:#999" id="grade-prog-lbl"></span>
+      <span class="saved-badge" id="saved-badge">✓ auto-saved</span>
     </div>
   </div>
 </div>
 
-<!-- 4: Grade -->
-<div id="sec4" style="display:none">
-  <div class="card">
-    <div class="row-between">
-      <div>
-        <button class="back" onclick="go(3)" style="margin-bottom:.5rem">← back to groups</button>
-        <div class="info-bar" id="grp-info" style="margin:0"></div>
-      </div>
-      <button class="export" onclick="exportXLSX()">⬇ download Excel</button>
-    </div>
-  </div>
-  <div id="students-list"></div>
-  <div class="card" style="background:#f9f9f6">
-    <div class="row-between">
-      <span style="font-size:13px;color:#888" id="grade-prog-lbl"></span>
-      <span class="saved" id="saved-badge">✓ auto-saved</span>
-    </div>
-  </div>
-</div>
-
-</div>
 <script>
-let groups=[],grades={};
-let curLab='',curNick='';
-let criteria=[
-  {label:'Presentation clarity',max:20},
-  {label:'Technical understanding',max:20},
-  {label:'Contribution to project',max:20},
-  {label:'Answering questions',max:20}
+let groups = [], grades = {}, curLab = '', curNick = '', dataLoaded = false;
+let criteria = [
+  { label: 'Presentation clarity', max: 20 },
+  { label: 'Technical understanding', max: 20 },
+  { label: 'Contribution to project', max: 20 },
+  { label: 'Answering questions', max: 20 }
 ];
 
-function renderCrit(){
-  document.getElementById('crit-list').innerHTML=criteria.map((c,i)=>`
+// ── Criteria ──────────────────────────────────────────────
+function renderCrit() {
+  document.getElementById('crit-list').innerHTML = criteria.map((c, i) => `
     <div class="crit-row">
-      <input type="text" value="${c.label}" oninput="criteria[${i}].label=this.value">
-      <span style="font-size:13px;color:#ccc">/ </span>
-      <input type="number" value="${c.max}" min="1" max="100" oninput="criteria[${i}].max=+this.value" style="width:56px;text-align:center">
+      <input type="text" value="${esc_attr(c.label)}" oninput="criteria[${i}].label=this.value">
+      <span style="font-size:13px;color:#ccc">/</span>
+      <input type="number" value="${c.max}" min="1" max="100" oninput="criteria[${i}].max=+this.value" style="width:58px;text-align:center">
       <button class="danger" onclick="rmCrit(${i})">remove</button>
     </div>`).join('');
 }
-function addCrit(){criteria.push({label:'New criterion',max:20});renderCrit();}
-function rmCrit(i){criteria.splice(i,1);renderCrit();}
+function addCrit() { criteria.push({ label: 'New criterion', max: 20 }); renderCrit(); }
+function rmCrit(i) { criteria.splice(i, 1); renderCrit(); }
 renderCrit();
 
-document.getElementById('fin').addEventListener('change',function(e){
-  const f=e.target.files[0];if(!f)return;
-  document.getElementById('fname').textContent=f.name;
-  const r=new FileReader();
-  r.onload=ev=>{
-    const wb=XLSX.read(ev.target.result,{type:'binary'});
+// ── File upload ───────────────────────────────────────────
+document.getElementById('fin').addEventListener('change', function (e) {
+  const f = e.target.files[0]; if (!f) return;
+  document.getElementById('fname').textContent = f.name;
+  const r = new FileReader();
+  r.onload = ev => {
+    const wb = XLSX.read(ev.target.result, { type: 'binary' });
     parseGroups(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
   };
   r.readAsBinaryString(f);
 });
 
-function s(v){return String(v||'').trim();}
+function str(v) { return String(v == null ? '' : v).trim(); }
 
-function parseGroups(data){
-  const map={};
-  data.forEach(row=>{
-    const nick=s(row['Your Group Nickname (used In Code)']||row['Group Nickname']||'');
-    const lab=s(row['Lab Group']||'');
-    const proj=s(row['Project']||'');
-    const key=(lab+'||'+nick)||proj||('Row'+row['ID']);
-    if(!map[key])map[key]={name:key,nickname:nick,labGroup:lab,project:proj,students:[]};
-    for(let n=1;n<=4;n++){
-      const nm=row[`Student ${n} name`],id=row[`Student ${n} ID`];
-      if(nm&&s(nm))map[key].students.push({name:s(nm),id:s(id||'')});
+// Finds nickname column regardless of exact capitalisation
+function getNickname(row) {
+  for (const k of Object.keys(row)) {
+    if (k.toLowerCase().includes('nickname') || k.toLowerCase().includes('group nickname')) {
+      return str(row[k]);
+    }
+  }
+  return '';
+}
+function getLabGroup(row) {
+  for (const k of Object.keys(row)) {
+    if (k.toLowerCase() === 'lab group') return str(row[k]);
+  }
+  return '';
+}
+function getProject(row) {
+  for (const k of Object.keys(row)) {
+    if (k.toLowerCase() === 'project') return str(row[k]);
+  }
+  return '';
+}
+
+function parseGroups(data) {
+  const map = {};
+  data.forEach(row => {
+    const nick = getNickname(row);
+    const lab  = getLabGroup(row);
+    const proj = getProject(row);
+    // key = lab + nickname to allow same nickname in different labs
+    const key = (lab + '||' + nick) || proj || ('row' + row['ID']);
+    if (!map[key]) map[key] = { key, nickname: nick, labGroup: lab, project: proj, students: [] };
+    for (let n = 1; n <= 4; n++) {
+      // find student name/id columns case-insensitively
+      let nm = '', id = '';
+      for (const k of Object.keys(row)) {
+        const kl = k.toLowerCase();
+        if (kl === `student ${n} name`) nm = str(row[k]);
+        if (kl === `student ${n} id`)   id = str(row[k]);
+      }
+      if (nm) map[key].students.push({ name: nm, id });
     }
   });
-  groups=Object.values(map).map(g=>{
-    const seen=new Set();
-    g.students=g.students.filter(st=>{if(seen.has(st.name))return false;seen.add(st.name);return true;});
+  groups = Object.values(map).map(g => {
+    const seen = new Set();
+    g.students = g.students.filter(s => { if (seen.has(s.name)) return false; seen.add(s.name); return true; });
     return g;
-  });
-  go(2);
+  }).filter(g => g.students.length > 0);
+
+  dataLoaded = true;
+  goStep(2);
 }
 
-function go(n){
-  [1,2,3,4].forEach(i=>{
-    document.getElementById('sec'+i).style.display=i===n?'block':'none';
-    const el=document.getElementById('stp'+i);
-    el.className='step'+(i<n?' done':i===n?' active':'');
+// ── Step navigation ───────────────────────────────────────
+function goStep(n) {
+  if (n > 1 && !dataLoaded) return;
+  if (n > 2 && !curLab) return;
+  if (n > 3 && !curNick) return;
+
+  [1, 2, 3, 4].forEach(i => {
+    document.getElementById('sec' + i).style.display = i === n ? 'block' : 'none';
+    const bc = document.getElementById('bc' + i);
+    if (i < n) { bc.className = 'bc-item'; }
+    else if (i === n) { bc.className = 'bc-item active'; }
+    else { bc.className = i === 2 && dataLoaded ? 'bc-item' : i === 3 && curLab ? 'bc-item' : i === 4 && curNick ? 'bc-item' : 'bc-item disabled'; }
   });
-  if(n===2)renderLabs();
-  if(n===3)renderNicks();
-  if(n===4)renderGrading();
+  // also unlock breadcrumbs based on state
+  if (dataLoaded) document.getElementById('bc2').classList.remove('disabled');
+  if (curLab)     document.getElementById('bc3').classList.remove('disabled');
+  if (curNick)    document.getElementById('bc4').classList.remove('disabled');
+
+  if (n === 2) renderLabs();
+  if (n === 3) renderNicks();
+  if (n === 4) renderGrading();
 }
 
-// Step 2
-function renderLabs(){
-  const labs=[...new Set(groups.map(g=>g.labGroup).filter(Boolean))].sort();
-  document.getElementById('lab-btns').innerHTML=labs.map(l=>{
-    const allGraded=groups.filter(g=>g.labGroup===l).every(g=>isGraded(g));
-    return`<button class="pill${allGraded?' graded':''}${l===curLab?' active':''}" onclick="selectLab('${esc(l)}')">${l}${allGraded?' ✓':''}</button>`;
+// ── Step 2: Lab groups ────────────────────────────────────
+function renderLabs() {
+  const labs = [...new Set(groups.map(g => g.labGroup).filter(Boolean))].sort();
+  document.getElementById('lab-btns').innerHTML = labs.map(l => {
+    const allDone = groups.filter(g => g.labGroup === l).every(g => isGraded(g));
+    let cls = 'pill' + (allDone ? ' done' : '') + (l === curLab ? ' active' : '');
+    return `<button class="${cls}" onclick="selectLab('${esc_js(l)}')">${l}${allDone ? ' ✓' : ''}</button>`;
   }).join('');
   updateOverall();
 }
-function selectLab(lab){curLab=lab;curNick='';go(3);}
-function updateOverall(){
-  const tot=groups.length,graded=groups.filter(g=>isGraded(g)).length;
-  const pct=tot?Math.round(graded/tot*100):0;
-  document.getElementById('overall-label').textContent=graded+' / '+tot+' groups graded';
-  document.getElementById('overall-bar').style.width=pct+'%';
+function selectLab(lab) { curLab = lab; goStep(3); }
+function updateOverall() {
+  const tot = groups.length, done = groups.filter(g => isGraded(g)).length;
+  const pct = tot ? Math.round(done / tot * 100) : 0;
+  document.getElementById('overall-lbl').textContent = done + ' / ' + tot + ' groups graded';
+  document.getElementById('overall-bar').style.width = pct + '%';
 }
 
-// Step 3
-function renderNicks(){
-  document.getElementById('lab-info').innerHTML=`Lab group: <strong>${curLab}</strong>`;
-  const labGs=groups.filter(g=>g.labGroup===curLab);
-  const nicks=[...new Set(labGs.map(g=>g.nickname||g.name))].sort();
-  document.getElementById('nick-btns').innerHTML=nicks.map(n=>{
-    const g=labGs.find(x=>(x.nickname||x.name)===n);
-    const graded=g&&isGraded(g);
-    return`<button class="pill${graded?' graded':''}${n===curNick?' active':''}" onclick="selectNick('${esc(n)}')">${n}${graded?' ✓':''}</button>`;
+// ── Step 3: Nicknames ─────────────────────────────────────
+function renderNicks() {
+  document.getElementById('lab-info').innerHTML = 'Lab group: <strong>' + curLab + '</strong>';
+  const labGs = groups.filter(g => g.labGroup === curLab);
+  document.getElementById('nick-btns').innerHTML = labGs.map(g => {
+    const done = isGraded(g);
+    const nick = g.nickname || g.key;
+    let cls = 'pill' + (done ? ' done' : '') + (nick === curNick ? ' active' : '');
+    return `<button class="${cls}" onclick="selectNick('${esc_js(nick)}')">${nick}${done ? ' ✓' : ''}</button>`;
   }).join('');
-  const graded=labGs.filter(g=>isGraded(g)).length;
-  const pct=labGs.length?Math.round(graded/labGs.length*100):0;
-  document.getElementById('lab-prog-lbl').textContent=graded+' / '+labGs.length+' groups graded in this lab';
-  document.getElementById('lab-prog-bar').style.width=pct+'%';
+  const done = labGs.filter(g => isGraded(g)).length;
+  const pct  = labGs.length ? Math.round(done / labGs.length * 100) : 0;
+  document.getElementById('lab-prog-lbl').textContent = done + ' / ' + labGs.length + ' groups graded in ' + curLab;
+  document.getElementById('lab-prog-bar').style.width = pct + '%';
 }
-function selectNick(nick){curNick=nick;go(4);}
+function selectNick(nick) { curNick = nick; goStep(4); }
 
-function isGraded(g){
-  return g.students.length>0&&g.students.every(st=>criteria.every(c=>{
-    const v=grades[g.name]?.[st.name]?.[c.label];
-    return v!==undefined&&v!=='';
-  }));
+function isGraded(g) {
+  return g.students.length > 0 && g.students.every(s =>
+    criteria.every(c => { const v = grades[g.key]?.[s.name]?.[c.label]; return v !== undefined && v !== ''; })
+  );
 }
 
-// Step 4
-function renderGrading(){
-  const g=groups.find(x=>x.labGroup===curLab&&(x.nickname||x.name)===curNick);
-  if(!g)return;
-  document.getElementById('grp-info').innerHTML=
-    `Lab: <strong>${curLab}</strong>&ensp;·&ensp;Nickname: <strong>${curNick}</strong>&ensp;·&ensp;Project: ${g.project||'—'}&ensp;·&ensp;${g.students.length} student${g.students.length!==1?'s':''}`;
+// ── Step 4: Grading ───────────────────────────────────────
+function renderGrading() {
+  const g = groups.find(x => x.labGroup === curLab && (x.nickname || x.key) === curNick);
+  if (!g) return;
 
-  document.getElementById('students-list').innerHTML=g.students.map(st=>`
+  document.getElementById('grp-info').innerHTML =
+    'Lab: <strong>' + curLab + '</strong> &ensp;·&ensp; Group: <strong>' + (g.nickname || g.key) + '</strong>' +
+    (g.project ? ' &ensp;·&ensp; ' + g.project : '') +
+    ' &ensp;·&ensp; ' + g.students.length + ' student' + (g.students.length !== 1 ? 's' : '');
+
+  document.getElementById('students-list').innerHTML = g.students.map(st => `
     <div class="s-card">
       <div class="s-header">
         <div class="avatar">${inits(st.name)}</div>
         <div>
           <div class="s-name">${st.name}</div>
-          <div class="s-id">${st.id||'no ID'}</div>
+          <div class="s-id">${st.id || 'no ID'}</div>
         </div>
-        <span class="s-total" id="tot-${tid(g.name,st.name)}"></span>
+        <span class="s-total" id="tot-${tid(g.key, st.name)}"></span>
       </div>
       <div class="grades-grid">
-        ${criteria.map(c=>`
+        ${criteria.map(c => `
           <div class="g-cell">
             <label>${c.label}</label>
             <div class="g-row">
-              <input type="number" min="0" max="${c.max}" value="${getG(g.name,st.name,c.label)}"
-                oninput="setG('${esc(g.name)}','${esc(st.name)}','${esc(c.label)}',+this.value,${c.max},'${tid(g.name,st.name)}')">
-              <span>/${c.max}</span>
+              <input type="number" min="0" max="${c.max}" value="${getG(g.key, st.name, c.label)}"
+                oninput="setG('${esc_js(g.key)}','${esc_js(st.name)}','${esc_js(c.label)}',+this.value,${c.max},'${tid(g.key,st.name)}')">
+              <span class="g-max">/ ${c.max}</span>
             </div>
           </div>`).join('')}
       </div>
       <div>
-        <label style="font-size:11px;color:#bbb;display:block;margin-bottom:3px">Comment</label>
-        <textarea rows="2" placeholder="Optional..." oninput="setComment('${esc(g.name)}','${esc(st.name)}',this.value)">${grades[g.name]?.[st.name]?.['_comment']||''}</textarea>
+        <label style="font-size:11px;color:#ccc;display:block;margin-bottom:3px">Comment (optional)</label>
+        <textarea rows="2" placeholder="Notes about this student..." oninput="setComment('${esc_js(g.key)}','${esc_js(st.name)}',this.value)">${grades[g.key]?.[st.name]?.['_comment'] || ''}</textarea>
       </div>
     </div>`).join('');
 
-  g.students.forEach(st=>updateTot(g.name,st.name));
+  g.students.forEach(st => updateTot(g.key, st.name));
   updateGradeProg(g);
 }
 
-function esc(v){return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
-function tid(g,s){return(g+s).replace(/[^a-zA-Z0-9]/g,'_').slice(0,50);}
-function inits(n){return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
-function getG(g,s,c){return grades[g]?.[s]?.[c]??'';}
+function getG(gk, sn, cl) { return grades[gk]?.[sn]?.[cl] ?? ''; }
 
-function setG(g,s,c,val,max,id){
-  if(!grades[g])grades[g]={};
-  if(!grades[g][s])grades[g][s]={};
-  grades[g][s][c]=Math.min(Math.max(isNaN(val)?0:val,0),max);
-  updateTot(g,s);flash();
-  const grp=groups.find(x=>x.name===g);if(grp)updateGradeProg(grp);
+function setG(gk, sn, cl, val, max, id) {
+  if (!grades[gk]) grades[gk] = {};
+  if (!grades[gk][sn]) grades[gk][sn] = {};
+  grades[gk][sn][cl] = Math.min(Math.max(isNaN(val) ? 0 : val, 0), max);
+  updateTot(gk, sn);
+  flash();
+  const g = groups.find(x => x.key === gk); if (g) updateGradeProg(g);
 }
-function setComment(g,s,val){
-  if(!grades[g])grades[g]={};
-  if(!grades[g][s])grades[g][s]={};
-  grades[g][s]['_comment']=val;flash();
+function setComment(gk, sn, val) {
+  if (!grades[gk]) grades[gk] = {};
+  if (!grades[gk][sn]) grades[gk][sn] = {};
+  grades[gk][sn]['_comment'] = val;
+  flash();
 }
-function updateTot(g,s){
-  const el=document.getElementById('tot-'+tid(g,s));if(!el)return;
-  const d=grades[g]?.[s]||{};
-  const tot=criteria.reduce((sum,c)=>sum+(+d[c.label]||0),0);
-  const mx=criteria.reduce((sum,c)=>sum+c.max,0);
-  const pct=mx?Math.round(tot/mx*100):0;
-  el.textContent=tot+'/'+mx+' ('+pct+'%)';
-  el.style.color=pct>=80?'#2e7d32':pct>=50?'#e65100':'#c62828';
+function updateTot(gk, sn) {
+  const el = document.getElementById('tot-' + tid(gk, sn)); if (!el) return;
+  const d = grades[gk]?.[sn] || {};
+  const tot = criteria.reduce((s, c) => s + (+d[c.label] || 0), 0);
+  const mx  = criteria.reduce((s, c) => s + c.max, 0);
+  const pct = mx ? Math.round(tot / mx * 100) : 0;
+  el.textContent = tot + ' / ' + mx + ' (' + pct + '%)';
+  el.style.color = pct >= 80 ? '#2e7d32' : pct >= 50 ? '#e65100' : '#c62828';
 }
-function updateGradeProg(g){
-  const graded=g.students.filter(st=>criteria.every(c=>{const v=grades[g.name]?.[st.name]?.[c.label];return v!==undefined&&v!=='';} )).length;
-  document.getElementById('grade-prog-lbl').textContent=graded+' / '+g.students.length+' students graded';
+function updateGradeProg(g) {
+  const done = g.students.filter(s =>
+    criteria.every(c => { const v = grades[g.key]?.[s.name]?.[c.label]; return v !== undefined && v !== ''; })
+  ).length;
+  document.getElementById('grade-prog-lbl').textContent = done + ' / ' + g.students.length + ' students fully graded';
 }
-function flash(){
-  const b=document.getElementById('saved-badge');
+function flash() {
+  const b = document.getElementById('saved-badge');
   b.classList.add('show');
-  clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),2000);
+  clearTimeout(b._t);
+  b._t = setTimeout(() => b.classList.remove('show'), 2000);
 }
 
-// Export
-function exportXLSX(){
-  const mx=criteria.reduce((sum,c)=>sum+c.max,0);
-  const hdr=['Student name','Student ID','Lab Group','Group Nickname','Project',...criteria.map(c=>c.label+' (/'+c.max+')'),'Total (/'+mx+')','Comment'];
-  const rows=[hdr];
-  groups.forEach(g=>g.students.forEach(st=>{
-    const d=grades[g.name]?.[st.name]||{};
-    const scores=criteria.map(c=>d[c.label]!==undefined?+d[c.label]:'');
-    const tot=criteria.reduce((sum,c)=>sum+(+d[c.label]||0),0);
-    rows.push([st.name,st.id,g.labGroup,g.nickname,g.project,...scores,tot,d['_comment']||'']);
+// ── Helpers ───────────────────────────────────────────────
+function esc_js(v)   { return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function esc_attr(v) { return String(v).replace(/"/g,'&quot;'); }
+function tid(gk, sn) { return (gk + sn).replace(/[^a-zA-Z0-9]/g, '_').slice(0, 60); }
+function inits(n)    { return n.split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase(); }
+
+// ── Export to Excel ───────────────────────────────────────
+function exportXLSX() {
+  const mx  = criteria.reduce((s, c) => s + c.max, 0);
+  const hdr = ['Student name', 'Student ID', 'Lab Group', 'Group Nickname', 'Project',
+    ...criteria.map(c => c.label + ' (/' + c.max + ')'), 'Total (/' + mx + ')', 'Comment'];
+  const rows = [hdr];
+  groups.forEach(g => g.students.forEach(st => {
+    const d      = grades[g.key]?.[st.name] || {};
+    const scores = criteria.map(c => d[c.label] !== undefined ? +d[c.label] : '');
+    const tot    = criteria.reduce((s, c) => s + (+d[c.label] || 0), 0);
+    rows.push([st.name, st.id, g.labGroup, g.nickname, g.project, ...scores, tot, d['_comment'] || '']);
   }));
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:22},{wch:14},{wch:14},{wch:22},{wch:24},...criteria.map(()=>({wch:20})),{wch:12},{wch:30}];
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Grades');
-  XLSX.writeFile(wb,'presentation_grades.xlsx');
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 12 }, { wch: 20 }, { wch: 26 },
+    ...criteria.map(() => ({ wch: 20 })), { wch: 12 }, { wch: 32 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Grades');
+  XLSX.writeFile(wb, 'presentation_grades.xlsx');
 }
 </script>
 </body>

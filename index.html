@@ -10,8 +10,8 @@
 <body>
 <div class="wrap">
 
-  <h1>Project Grader by Ilias TOUGUI</h1>
-  <p class="sub">Grade student project presentations · grades saved automatically in the browser</p>
+  <h1>Project Grader &mdash; Ilias TOUGUI</h1>
+  <p class="sub">Grade student project presentations &middot; grades saved automatically in the browser</p>
 
   <!-- Breadcrumb -->
   <div class="bc">
@@ -46,13 +46,25 @@
       </div>
       <input type="file" id="fin" accept=".xlsx,.xls" style="display:none">
     </div>
+
     <div class="card">
       <div class="row-between" style="margin-bottom:.85rem">
         <span class="card-label" style="margin:0">Grading criteria</span>
-        <button class="sm" onclick="addCrit()">+ add</button>
+        <button class="sm" onclick="addCrit()">+ add criterion</button>
+      </div>
+      <div class="crit-header">
+        <span style="flex:1">Criterion label</span>
+        <span style="width:52px;text-align:center">Max</span>
+        <span style="width:16px"></span>
+        <span style="width:52px;text-align:center">Weight&nbsp;%</span>
+        <span style="width:28px"></span>
       </div>
       <div id="crit-list"></div>
-      <p style="font-size:12px;color:#ccc;margin-top:.6rem">Edit criteria before grading. Total = sum of all.</p>
+      <div id="weight-warn" class="weight-warn" style="display:none"></div>
+      <p style="font-size:12px;color:#bbb;margin-top:.6rem">
+        Final grade = weighted sum scaled to the project's max mark (16, 18, or 20).
+        Weights must sum to 100%.
+      </p>
     </div>
   </div>
 
@@ -67,13 +79,11 @@
         <span style="font-size:13px;color:#999">Overall progress</span>
         <span style="font-size:13px;font-weight:600" id="overall-lbl"></span>
       </div>
-      <div class="prog-wrap">
-        <div class="prog-bar" id="overall-bar" style="width:0%"></div>
-      </div>
+      <div class="prog-wrap"><div class="prog-bar" id="overall-bar" style="width:0%"></div></div>
     </div>
   </div>
 
-  <!-- Step 3: Project group (nickname) -->
+  <!-- Step 3: Project group -->
   <div id="sec3" style="display:none">
     <div class="card">
       <div class="card-label">Select presenting group</div>
@@ -81,9 +91,7 @@
       <div class="tag-group" id="nick-btns"></div>
       <div style="margin-top:1rem">
         <span style="font-size:12px;color:#bbb" id="lab-prog-lbl"></span>
-        <div class="prog-wrap">
-          <div class="prog-bar" id="lab-prog-bar" style="width:0%"></div>
-        </div>
+        <div class="prog-wrap"><div class="prog-bar" id="lab-prog-bar" style="width:0%"></div></div>
       </div>
     </div>
   </div>
@@ -103,8 +111,7 @@
     </div>
   </div>
 
-</div><!-- /wrap -->
-
+</div>
 <script src="app.js"></script>
 </body>
 </html>

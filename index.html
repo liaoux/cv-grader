@@ -11,7 +11,7 @@
 <div class="wrap">
 
   <h1>Project Grader &mdash; Ilias TOUGUI</h1>
-  <p class="sub">Grade student project presentations &middot; grades saved automatically in the browser</p>
+  <p class="sub">Grade student project presentations &middot; saved automatically in the browser</p>
 
   <!-- Breadcrumb -->
   <div class="bc">
@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  <!-- Step 1: Upload + Criteria -->
+  <!-- Step 1: Upload -->
   <div id="sec1">
     <div class="card">
       <div class="upload-zone" onclick="document.getElementById('fin').click()">
@@ -46,24 +46,23 @@
       </div>
       <input type="file" id="fin" accept=".xlsx,.xls" style="display:none">
     </div>
-
     <div class="card">
-      <div class="row-between" style="margin-bottom:.85rem">
-        <span class="card-label" style="margin:0">Grading criteria</span>
-        <button class="sm" onclick="addCrit()">+ add criterion</button>
+      <p style="font-size:13px;color:#999;margin-bottom:.5rem">Expected columns in your Excel sheet:</p>
+      <div class="col-pills">
+        <span class="col-pill required">Lab Group</span>
+        <span class="col-pill required">Nickname</span>
+        <span class="col-pill required">Project</span>
+        <span class="col-pill required">Student 1 Name</span>
+        <span class="col-pill">Student 1 ID</span>
+        <span class="col-pill">Student 2 Name</span>
+        <span class="col-pill">Student 2 ID</span>
+        <span class="col-pill">Student 3 Name</span>
+        <span class="col-pill">Student 3 ID</span>
+        <span class="col-pill">Student 4 Name</span>
+        <span class="col-pill">Student 4 ID</span>
       </div>
-      <div class="crit-header">
-        <span style="flex:1">Criterion label</span>
-        <span style="width:52px;text-align:center">Max</span>
-        <span style="width:16px"></span>
-        <span style="width:52px;text-align:center">Weight&nbsp;%</span>
-        <span style="width:28px"></span>
-      </div>
-      <div id="crit-list"></div>
-      <div id="weight-warn" class="weight-warn" style="display:none"></div>
-      <p style="font-size:12px;color:#bbb;margin-top:.6rem">
-        Final grade = weighted sum scaled to the project's max mark (16, 18, or 20).
-        Weights must sum to 100%.
+      <p style="font-size:11px;color:#ccc;margin-top:.6rem">
+        Dark = required. Column names are matched flexibly (case-insensitive, partial match).
       </p>
     </div>
   </div>

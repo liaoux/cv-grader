@@ -1,9 +1,7 @@
 // ── Constants ─────────────────────────────────────────────
-const LS_GRADES = 'pg_grades_v3';
-const LS_GROUPS = 'pg_groups_v3';
-const LS_CRIT   = 'pg_criteria_v3';
+const LS_GRADES = 'pg_grades_v4';
+const LS_GROUPS = 'pg_groups_v4';
 
-// Project max marks
 const PROJECT_MAX = {
   '1': 16, 'document scanner': 16,
   '2': 16, 'instagram': 16, 'filter': 16,
@@ -24,37 +22,25 @@ function projectMax(proj) {
 }
 
 // ── State ─────────────────────────────────────────────────
-let groups   = [];
-let grades   = {};
-let curLab   = '';
-let curNick  = '';
-let step     = 1;
-
-// Defense-aligned criteria — weights sum to 100
-let criteria = [
-  { label: 'Code / Concept answer',   max: 20, weight: 50 },
-  { label: 'Technical understanding', max: 20, weight: 25 },
-  { label: 'Presentation & report',   max: 20, weight: 15 },
-  { label: 'Contribution to project', max: 20, weight: 10 },
-];
+let groups  = [];
+let grades  = {};   // grades[gKey][studentName] = { score, card, comment }
+let curLab  = '';
+let curNick = '';
+let step    = 1;
 
 // ── Boot ──────────────────────────────────────────────────
 (function boot() {
   try {
     const sg = localStorage.getItem(LS_GROUPS);
-    const sc = localStorage.getItem(LS_CRIT);
     const sv = localStorage.getItem(LS_GRADES);
     if (sg && sv) {
       groups = JSON.parse(sg);
       grades = JSON.parse(sv);
-      if (sc) criteria = JSON.parse(sc);
-      renderCrit();
       document.getElementById('restore-banner').style.display = 'flex';
       goStep(2);
       return;
     }
   } catch (e) { console.warn('restore failed', e); }
-  renderCrit();
 })();
 
 // ── File upload ───────────────────────────────────────────
@@ -71,7 +57,7 @@ document.getElementById('fin').addEventListener('change', function (e) {
 });
 
 // ── Parsing ───────────────────────────────────────────────
-function ts(v)  { return String(v == null ? '' : v).trim(); }
+function ts(v) { return String(v == null ? '' : v).trim(); }
 
 function colVal(row, ...names) {
   for (const k of Object.keys(row)) {
@@ -113,50 +99,17 @@ function parseGroups(data) {
   goStep(2);
 }
 
-// ── Criteria ──────────────────────────────────────────────
-function renderCrit() {
-  document.getElementById('crit-list').innerHTML = criteria.map((c, i) => `
-    <div class="crit-row">
-      <input type="text" value="${ea(c.label)}" oninput="criteria[${i}].label=this.value" style="flex:1">
-      <input type="number" value="${c.max}" min="1" max="100"
-        oninput="criteria[${i}].max=+this.value" style="width:52px;text-align:center" title="Max score for this criterion">
-      <span class="crit-weight-lbl">wt%</span>
-      <input type="number" value="${c.weight}" min="1" max="100"
-        oninput="criteria[${i}].weight=+this.value;updateWeightWarning()"
-        style="width:52px;text-align:center" title="Weight % (all should sum to 100)">
-      <button class="danger" onclick="rmCrit(${i})">✕</button>
-    </div>`).join('');
-  updateWeightWarning();
-}
-
-function updateWeightWarning() {
-  const total = criteria.reduce((s, c) => s + (+c.weight || 0), 0);
-  const el = document.getElementById('weight-warn');
-  if (!el) return;
-  el.style.display = total !== 100 ? 'block' : 'none';
-  el.textContent   = `⚠ Weights sum to ${total}% — should be 100% for correct /20 scaling.`;
-}
-
-function addCrit() {
-  const remaining = 100 - criteria.reduce((s, c) => s + (+c.weight || 0), 0);
-  criteria.push({ label: 'New criterion', max: 20, weight: Math.max(remaining, 5) });
-  renderCrit();
-}
-
-function rmCrit(i) { criteria.splice(i, 1); renderCrit(); }
-
 // ── Persistence ───────────────────────────────────────────
 function persist() {
   try {
     localStorage.setItem(LS_GROUPS, JSON.stringify(groups));
     localStorage.setItem(LS_GRADES, JSON.stringify(grades));
-    localStorage.setItem(LS_CRIT,   JSON.stringify(criteria));
   } catch(e) { showBadge('⚠ could not save', false); }
 }
 
 function clearSaved() {
   if (!confirm('Clear all saved grades? This cannot be undone.')) return;
-  [LS_GRADES, LS_GROUPS, LS_CRIT].forEach(k => localStorage.removeItem(k));
+  [LS_GRADES, LS_GROUPS].forEach(k => localStorage.removeItem(k));
   groups = []; grades = {}; curLab = ''; curNick = ''; step = 1;
   document.getElementById('restore-banner').style.display = 'none';
   goStep(1);
@@ -231,12 +184,10 @@ function renderNicks() {
 function selectNick(nick) { curNick = nick; goStep(4); }
 
 function isGraded(g) {
-  return g.students.length > 0 && g.students.every(s =>
-    criteria.every(c => {
-      const v = grades[g.key]?.[s.name]?.[c.label];
-      return v !== undefined && v !== '';
-    })
-  );
+  return g.students.length > 0 && g.students.every(s => {
+    const v = grades[g.key]?.[s.name]?.score;
+    return v !== undefined && v !== '';
+  });
 }
 
 // ── Step 4: Grading ───────────────────────────────────────
@@ -245,6 +196,7 @@ function renderGrading() {
   if (!g) { goStep(3); return; }
 
   const pmx = projectMax(g.project);
+
   document.getElementById('grp-info').innerHTML =
     'Lab: <strong>'+curLab+'</strong> &nbsp;·&nbsp; Group: <strong>'+(g.nickname||g.key)+'</strong>'+
     (g.project ? ' &nbsp;·&nbsp; <span class="proj-tag-inline">'+g.project+'</span>' : '')+
@@ -252,7 +204,13 @@ function renderGrading() {
     ' &nbsp;·&nbsp; <span class="max-badge">max '+pmx+'/20</span>';
 
   document.getElementById('students-list').innerHTML = g.students.map(st => {
-    const card = grades[g.key]?.[st.name]?.['_card'] ?? '';
+    const entry   = grades[g.key]?.[st.name] || {};
+    const card    = entry.card    ?? '';
+    const score   = entry.score   ?? '';
+    const comment = entry.comment ?? '';
+    const pct     = score !== '' && pmx ? Math.round(score / pmx * 100) : null;
+    const dispCls = pct === null ? '' : pct >= 80 ? 'disp-good' : pct >= 50 ? 'disp-mid' : 'disp-low';
+
     return `
     <div class="s-card">
       <div class="s-header">
@@ -261,140 +219,118 @@ function renderGrading() {
           <div class="s-name">${st.name}</div>
           <div class="s-id">${st.id || 'no ID'}</div>
         </div>
-        <div class="s-right">
-          <div class="card-picker">
-            <span class="card-pick-lbl">Card drawn:</span>
-            <button class="card-pick${card==='code'?' card-pick-active card-pick-code':''}"
-              onclick="setCard('${ej(g.key)}','${ej(st.name)}','code')">💻 Code</button>
-            <button class="card-pick${card==='concept'?' card-pick-active card-pick-concept':''}"
-              onclick="setCard('${ej(g.key)}','${ej(st.name)}','concept')">💡 Concept</button>
-            <button class="card-pick${card===''?' card-pick-active card-pick-none':''}"
-              onclick="setCard('${ej(g.key)}','${ej(st.name)}','')" title="Clear">—</button>
-          </div>
-          <span class="s-total" id="tot-${tid(g.key,st.name)}"></span>
+        <div class="card-picker">
+          <span class="card-pick-lbl">Card drawn:</span>
+          <button class="card-pick${card==='code'?' card-pick-active card-pick-code':''}"
+            onclick="setCard('${ej(g.key)}','${ej(st.name)}','code')">💻 Code</button>
+          <button class="card-pick${card==='concept'?' card-pick-active card-pick-concept':''}"
+            onclick="setCard('${ej(g.key)}','${ej(st.name)}','concept')">💡 Concept</button>
+          <button class="card-pick${card===''?' card-pick-active card-pick-none':''}"
+            onclick="setCard('${ej(g.key)}','${ej(st.name)}','')" title="Clear">—</button>
         </div>
       </div>
-      <div class="grades-grid">
-        ${criteria.map(c => `
-          <div class="g-cell">
-            <label>${c.label} <span class="crit-w">(×${c.weight}%)</span></label>
-            <div class="g-row">
-              <input type="number" min="0" max="${c.max}"
-                value="${getG(g.key,st.name,c.label)}"
-                oninput="setG('${ej(g.key)}','${ej(st.name)}','${ej(c.label)}',+this.value,${c.max},'${tid(g.key,st.name)}','${ej(g.project||'')}')">
-              <span class="g-max">/ ${c.max}</span>
-            </div>
-          </div>`).join('')}
+
+      <div class="score-row">
+        <span class="score-lbl">Mark</span>
+        <input
+          type="number" min="0" max="${pmx}" step="0.5"
+          class="score-input"
+          placeholder="—"
+          value="${score}"
+          oninput="setScore('${ej(g.key)}','${ej(st.name)}',this.value,${pmx})">
+        <span class="score-max">/ ${pmx}</span>
+        <span class="score-pct ${dispCls}" id="disp-${tid(g.key,st.name)}">${pct !== null ? pct+'%' : ''}</span>
       </div>
-      <div>
-        <label style="font-size:11px;color:#bbb;display:block;margin-bottom:3px">Comment (optional)</label>
+
+      <div class="comment-row">
+        <label class="comment-lbl">Comment <span style="color:#ccc;font-weight:400">(optional)</span></label>
         <textarea rows="2" placeholder="Notes for this student..."
-          oninput="setComment('${ej(g.key)}','${ej(st.name)}',this.value)">${grades[g.key]?.[st.name]?.['_comment']||''}</textarea>
+          oninput="setComment('${ej(g.key)}','${ej(st.name)}',this.value)">${comment}</textarea>
       </div>
     </div>`;
   }).join('');
 
-  g.students.forEach(st => updateTot(g.key, st.name, g.project));
   updateGradeProg(g);
 }
 
-function getG(gk, sn, cl) { return grades[gk]?.[sn]?.[cl] ?? ''; }
-
-function setG(gk, sn, cl, val, max, totId, proj) {
+// ── Setters ───────────────────────────────────────────────
+function ensure(gk, sn) {
   if (!grades[gk])     grades[gk]     = {};
   if (!grades[gk][sn]) grades[gk][sn] = {};
-  grades[gk][sn][cl] = Math.min(Math.max(isNaN(val)?0:val, 0), max);
-  updateTot(gk, sn, proj);
+}
+
+function setScore(gk, sn, val, max) {
+  ensure(gk, sn);
+  const parsed = parseFloat(val);
+  grades[gk][sn].score = isNaN(parsed) ? '' : Math.min(Math.max(parsed, 0), max);
+  // update pct display
+  const el  = document.getElementById('disp-'+tid(gk, sn));
+  const pmx = max;
+  if (el) {
+    const s = grades[gk][sn].score;
+    if (s === '') { el.textContent = ''; el.className = 'score-pct'; }
+    else {
+      const pct = Math.round(s / pmx * 100);
+      el.textContent = pct + '%';
+      el.className = 'score-pct ' + (pct>=80?'disp-good':pct>=50?'disp-mid':'disp-low');
+    }
+  }
   persist();
   showBadge('✓ saved', true);
   const g = groups.find(x=>x.key===gk);
-  if (g) updateGradeProg(g);
+  if (g) { updateGradeProg(g); renderNicks(); renderLabs(); }
 }
 
 function setComment(gk, sn, val) {
-  if (!grades[gk])     grades[gk]     = {};
-  if (!grades[gk][sn]) grades[gk][sn] = {};
-  grades[gk][sn]['_comment'] = val;
+  ensure(gk, sn);
+  grades[gk][sn].comment = val;
   persist();
 }
 
 function setCard(gk, sn, val) {
-  if (!grades[gk])     grades[gk]     = {};
-  if (!grades[gk][sn]) grades[gk][sn] = {};
-  grades[gk][sn]['_card'] = val;
+  ensure(gk, sn);
+  grades[gk][sn].card = val;
   persist();
   showBadge('✓ saved', true);
   renderGrading();
 }
 
-// Weighted score scaled to projectMax
-function calcScore(gk, sn, proj) {
-  const d           = grades[gk]?.[sn] || {};
-  const pmx         = projectMax(proj);
-  const weightTotal = criteria.reduce((s,c) => s + (+c.weight||0), 0) || 100;
-  let weighted = 0;
-  criteria.forEach(c => {
-    const raw = +d[c.label] || 0;
-    weighted += (raw / c.max) * c.weight;
-  });
-  return (weighted / weightTotal) * pmx;
-}
-
-function updateTot(gk, sn, proj) {
-  const el = document.getElementById('tot-'+tid(gk,sn));
-  if (!el) return;
-  const score = calcScore(gk, sn, proj);
-  const pmx   = projectMax(proj);
-  const pct   = pmx ? Math.round(score/pmx*100) : 0;
-  el.textContent = score.toFixed(1)+' / '+pmx;
-  el.style.color = pct>=80 ? '#2e7d32' : pct>=50 ? '#e65100' : '#c62828';
-}
-
 function updateGradeProg(g) {
-  const done = g.students.filter(s =>
-    criteria.every(c => {
-      const v = grades[g.key]?.[s.name]?.[c.label];
-      return v !== undefined && v !== '';
-    })
-  ).length;
+  const done = g.students.filter(s => {
+    const v = grades[g.key]?.[s.name]?.score;
+    return v !== undefined && v !== '';
+  }).length;
   const el = document.getElementById('grade-prog-lbl');
-  if (el) el.textContent = done+' / '+g.students.length+' students fully graded';
+  if (el) el.textContent = done + ' / ' + g.students.length + ' students graded';
 }
 
 function showBadge(msg, ok) {
   const b = document.getElementById('saved-badge');
   b.textContent = msg;
-  b.className   = 'saved-badge show '+(ok?'ok':'err');
+  b.className   = 'saved-badge show ' + (ok ? 'ok' : 'err');
   clearTimeout(b._t);
   b._t = setTimeout(() => b.classList.remove('show'), 2200);
 }
 
 // ── Export ────────────────────────────────────────────────
 function exportXLSX() {
-  const hdr = [
-    'Student name','Student ID','Lab Group','Group Nickname','Project','Card drawn',
-    ...criteria.map(c=>c.label+' (/'+c.max+', ×'+c.weight+'%)'),
-    'Final grade (/20)','Comment'
-  ];
+  const hdr = ['Student name','Student ID','Lab Group','Group Nickname','Project','Card drawn','Mark','Max mark','Comment'];
   const rows = [hdr];
-  groups.forEach(g => g.students.forEach(st => {
-    const d      = grades[g.key]?.[st.name] || {};
-    const scores = criteria.map(c => d[c.label]!==undefined ? +d[c.label] : '');
-    const final  = calcScore(g.key, st.name, g.project);
-    rows.push([
-      st.name, st.id, g.labGroup, g.nickname, g.project,
-      d['_card'] || '',
-      ...scores,
-      +final.toFixed(2),
-      d['_comment'] || ''
-    ]);
-  }));
+  groups.forEach(g => {
+    const pmx = projectMax(g.project);
+    g.students.forEach(st => {
+      const e = grades[g.key]?.[st.name] || {};
+      rows.push([
+        st.name, st.id, g.labGroup, g.nickname, g.project,
+        e.card  || '',
+        e.score !== undefined && e.score !== '' ? +e.score : '',
+        pmx,
+        e.comment || ''
+      ]);
+    });
+  });
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [
-    {wch:24},{wch:12},{wch:12},{wch:20},{wch:26},{wch:10},
-    ...criteria.map(()=>({wch:22})),
-    {wch:16},{wch:34}
-  ];
+  ws['!cols'] = [{wch:24},{wch:12},{wch:12},{wch:20},{wch:26},{wch:10},{wch:8},{wch:10},{wch:36}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Grades');
   XLSX.writeFile(wb, 'presentation_grades.xlsx');
